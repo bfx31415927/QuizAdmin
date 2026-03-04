@@ -2,6 +2,7 @@ package ru.sknt.smi_alexey.quizadmin
 
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -12,12 +13,17 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // Принудительно удерживаем экран включённым
+//        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -25,7 +31,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         // === Подключение к WebSocket через OkHttp ===
-        val client = OkHttpClient()
+//        val client = OkHttpClient()
+        val client = OkHttpClient.Builder()
+            .pingInterval(15, TimeUnit.SECONDS) // Ping каждые 15 с
+            .build()
 
         val request = Request.Builder()
             .url("ws://188.243.20.65:16999/ws") // Адрес вашего WebSocket-сервера
@@ -52,6 +61,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                 webSocket.close(1000, null)
+                Log.d("onTest", "Соединение закрывается: $reason" )
                 runOnUiThread {
                     Toast.makeText(
                         this@MainActivity,
@@ -63,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 runOnUiThread {
-                    Log.d("onFailure", "Ошибка подключения: ${t.message}" )
+                    Log.d("onTest", "Ошибка подключения: ${t.message}" )
                     Toast.makeText(
                         this@MainActivity,
                         "Ошибка подключения: ${t.message}",
