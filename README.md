@@ -18,4 +18,13 @@
 						--> SEND: {"type":"text","content":"Привет"}
 						--> RCV: {"type":"pong"}
 
+11.03.2026
+----------
+1) Добавил в Preferences хост, порт и суффикс для коннекта к серверу
+2) Перенес код коннекта и взаимодействия с сервером из MainActivity.kt в MyWebSocket.kt
+3) В файле serialization добавил строку:
+   classDiscriminator = "_type" // или любое другое имя, не совпадающее с полем в классе
+	 в настройки Json (см. комменты в README.txt для QuizServer)
+
+
 
