@@ -26,5 +26,12 @@
    classDiscriminator = "_type" // или любое другое имя, не совпадающее с полем в классе
 	 в настройки Json (см. комменты в README.txt для QuizServer)
 
-
+12.03.2026 (16-17 часов)
+-----------------------
+1) Подправил конфиги libs.versions.toml, 
+   build.gradle.kts(:app), build.gradle.kts(:проекта)
+   для добавления плагина сериализации
+2) Написал функцию sendMessageWrapper(...) для посылки серверу
+   сериализованных объектов порожденных от WebSocketMessage классов
+3) Проверил sendMessageWrapper(...) в работе. 
 

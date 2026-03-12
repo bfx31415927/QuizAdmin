@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+//    kotlin("android")
+    kotlin("plugin.serialization") // ← Подключаем плагин сериализации
 }
 
 android {
@@ -41,7 +43,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.okhttp) // <-- Добавлена зависимость OkHttp
+    implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
