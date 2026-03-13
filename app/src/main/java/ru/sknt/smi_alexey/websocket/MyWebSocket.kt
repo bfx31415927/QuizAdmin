@@ -55,7 +55,26 @@ class MyWebSocket(private val activity: AppCompatActivity) {
 //                    target = "all"
 //                )
 //            )
-            sendMessageWrapper(
+//            sendMessageWrapper(
+//                StatusUpdate(
+//                    status = "status",
+//                    userId = "2",
+//                )
+//            )
+//            sendDirectMessage(
+//                TextMessage(
+//                    content = "Привет от Android-клиента!",
+//                    userId = "1"
+//                )
+//            )
+//            sendDirectMessage(
+//                CommandMessage(
+//                    command = "start_game",
+//                    params = mapOf("round" to "1"),
+//                    target = "all"
+//                )
+//            )
+            sendDirectMessage(
                 StatusUpdate(
                     status = "status",
                     userId = "2",
@@ -90,7 +109,7 @@ class MyWebSocket(private val activity: AppCompatActivity) {
         try {
             val data = json.encodeToJsonElement(serializer<T>(), message).jsonObject
             val wrapper = MessageWrapper(
-                wr_type = message.type,
+                wr_type = message._type,
                 version = "1.0",
                 data = data
             )
@@ -102,4 +121,18 @@ class MyWebSocket(private val activity: AppCompatActivity) {
             Log.e("MyWebSocket", "Ошибка в sendMessageWrapper: ${e.message}")
         }
     }
+
+    inline fun <reified T : WebSocketMessage> sendDirectMessage(message: T) {
+        try {
+            val jsonString = json.encodeToString(WebSocketMessage.serializer(),
+                message)
+
+            webSocket.send(jsonString)
+
+            Log.d("MyWebSocket", "sendDirectMessage отправил сообщение: $jsonString")
+        } catch (e: Exception) {
+            Log.e("MyWebSocket", "Ошибка в sendDirectMessage: ${e.message}")
+        }
+    }
+
 }
