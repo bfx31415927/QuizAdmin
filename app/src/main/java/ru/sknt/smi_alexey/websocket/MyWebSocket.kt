@@ -16,11 +16,13 @@ import ru.smi_alexey.quizserver.app.serverHost
 import ru.smi_alexey.quizserver.app.serverPort
 import ru.smi_alexey.quizserver.app.vs_suffix
 import ru.smi_alexey.serialization.CommandMessage
+import ru.smi_alexey.serialization.MessageType
 import ru.smi_alexey.serialization.MessageWrapper
 import ru.smi_alexey.serialization.ServerResponse
 import ru.smi_alexey.serialization.StatusUpdate
 import ru.smi_alexey.serialization.TextMessage
 import ru.smi_alexey.serialization.WebSocketMessage
+import ru.smi_alexey.serialization.analyzeMessageType
 import ru.smi_alexey.serialization.json
 import java.util.concurrent.TimeUnit
 
@@ -42,20 +44,20 @@ class MyWebSocket(private val activity: AppCompatActivity) {
             activity.runOnUiThread {
                 Log.d("MyWebSocket", "Соединение установлено")
             }
-//            sendMessageWrapper(
+//            sendWrapperMessage(
 //                TextMessage(
 //                    content = "Привет от Android-клиента!",
 //                    userId = "1"
 //                )
 //            )
-//            sendMessageWrapper(
+//            sendWrapperMessage(
 //                CommandMessage(
 //                    command = "start_game",
 //                    params = mapOf("round" to "1"),
 //                    target = "all"
 //                )
 //            )
-//            sendMessageWrapper(
+//            sendWrapperMessage(
 //                StatusUpdate(
 //                    status = "status",
 //                    userId = "2",
@@ -83,10 +85,40 @@ class MyWebSocket(private val activity: AppCompatActivity) {
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            activity.runOnUiThread {
-                val response = json.decodeFromString<ServerResponse>(text)
-                Log.d("MyWebSocket", "Ответ от сервера: response.success: ${response.success}" +
-                    " response.message: ${response.message}")
+//            activity.runOnUiThread {
+//            }
+            Log.d("MyWebSocket", "Получен JSON: $text")
+            try {
+                val messageType = analyzeMessageType(text)
+                when (messageType) {
+                    MessageType.DIRECT -> {
+                        // Прямой экземпляр sealed-класса
+                        val message = json.decodeFromString(
+                            WebSocketMessage.serializer(),
+                            text
+                        )
+                        handleWebSocketMessage(this, message)
+                    }
+
+                    MessageType.WRAPPED -> {
+                        // Сообщение в обёртке
+                        val wrapper = json.decodeFromString<MessageWrapper>(text)
+                        handleWrapperMessage(this, wrapper)
+                    }
+
+                    MessageType.UNKNOWN -> {
+                        val mess = "Получено сообщения неподдерживаемого формата: $text"
+                        Log.d("MyWebSocket", mess)
+                        sendWrapperMessage(
+                            ServerResponse( success = false, message = mess)
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                val mess = "Ошибка обработки сообщения: $text"
+                Log.e("MyWebSocket", mess, e)
+                sendWrapperMessage(
+                    ServerResponse(success = false, message = mess))
             }
         }
 
@@ -104,35 +136,4 @@ class MyWebSocket(private val activity: AppCompatActivity) {
         }
 
     })
-
-    inline fun <reified T : WebSocketMessage> sendMessageWrapper(message: T) {
-        try {
-            val data = json.encodeToJsonElement(serializer<T>(), message).jsonObject
-            val wrapper = MessageWrapper(
-                wr_type = message._type,
-                version = "1.0",
-                data = data
-            )
-            Log.d("MyWebSocket", "sendMessageWrapper готовит к отправке сообщение: $wrapper")
-            val jsonString = json.encodeToString(wrapper)
-            webSocket.send(jsonString)
-            Log.d("MyWebSocket", "sendMessageWrapper отправил сообщение: $jsonString")
-        } catch (e: Exception) {
-            Log.e("MyWebSocket", "Ошибка в sendMessageWrapper: ${e.message}")
-        }
-    }
-
-    inline fun <reified T : WebSocketMessage> sendDirectMessage(message: T) {
-        try {
-            val jsonString = json.encodeToString(WebSocketMessage.serializer(),
-                message)
-
-            webSocket.send(jsonString)
-
-            Log.d("MyWebSocket", "sendDirectMessage отправил сообщение: $jsonString")
-        } catch (e: Exception) {
-            Log.e("MyWebSocket", "Ошибка в sendDirectMessage: ${e.message}")
-        }
-    }
-
 }
