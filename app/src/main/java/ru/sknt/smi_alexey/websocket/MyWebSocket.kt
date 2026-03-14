@@ -12,6 +12,10 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import ru.sknt.smi_alexey.handle_server_message.handleWebSocketMessage
+import ru.sknt.smi_alexey.handle_server_message.handleWrapperMessage
+import ru.sknt.smi_alexey.handle_server_message.sendDirectMessage
+import ru.sknt.smi_alexey.handle_server_message.sendWrapperMessage
 import ru.smi_alexey.quizserver.app.serverHost
 import ru.smi_alexey.quizserver.app.serverPort
 import ru.smi_alexey.quizserver.app.vs_suffix
@@ -41,47 +45,47 @@ class MyWebSocket(private val activity: AppCompatActivity) {
         .build()
     val webSocket = client.newWebSocket(request, object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            activity.runOnUiThread {
-                Log.d("MyWebSocket", "Соединение установлено")
-            }
-//            sendWrapperMessage(
+//            activity.runOnUiThread {
+//            }
+            Log.d("MyWebSocket", "Соединение установлено")
+//            sendWrapperMessage(this@MyWebSocket,
 //                TextMessage(
 //                    content = "Привет от Android-клиента!",
 //                    userId = "1"
 //                )
 //            )
-//            sendWrapperMessage(
+//            sendWrapperMessage(this@MyWebSocket,
 //                CommandMessage(
 //                    command = "start_game",
 //                    params = mapOf("round" to "1"),
 //                    target = "all"
 //                )
 //            )
-//            sendWrapperMessage(
+//            sendWrapperMessage(this@MyWebSocket,
 //                StatusUpdate(
 //                    status = "status",
 //                    userId = "2",
 //                )
 //            )
-//            sendDirectMessage(
+//            sendDirectMessage(this@MyWebSocket,
 //                TextMessage(
 //                    content = "Привет от Android-клиента!",
 //                    userId = "1"
 //                )
 //            )
-//            sendDirectMessage(
+//            sendDirectMessage(this@MyWebSocket,
 //                CommandMessage(
 //                    command = "start_game",
 //                    params = mapOf("round" to "1"),
 //                    target = "all"
 //                )
 //            )
-            sendDirectMessage(
-                StatusUpdate(
-                    status = "status",
-                    userId = "2",
-                )
-            )
+//            sendDirectMessage(this@MyWebSocket,
+//                StatusUpdate(
+//                    status = "status",
+//                    userId = "2",
+//                )
+//            )
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -97,19 +101,19 @@ class MyWebSocket(private val activity: AppCompatActivity) {
                             WebSocketMessage.serializer(),
                             text
                         )
-                        handleWebSocketMessage(this, message)
+                        handleWebSocketMessage(this@MyWebSocket, message)
                     }
 
                     MessageType.WRAPPED -> {
                         // Сообщение в обёртке
                         val wrapper = json.decodeFromString<MessageWrapper>(text)
-                        handleWrapperMessage(this, wrapper)
+                        handleWrapperMessage(this@MyWebSocket, wrapper)
                     }
 
                     MessageType.UNKNOWN -> {
                         val mess = "Получено сообщения неподдерживаемого формата: $text"
                         Log.d("MyWebSocket", mess)
-                        sendWrapperMessage(
+                        sendWrapperMessage(this@MyWebSocket,
                             ServerResponse( success = false, message = mess)
                         )
                     }
@@ -117,22 +121,22 @@ class MyWebSocket(private val activity: AppCompatActivity) {
             } catch (e: Exception) {
                 val mess = "Ошибка обработки сообщения: $text"
                 Log.e("MyWebSocket", mess, e)
-                sendWrapperMessage(
+                sendWrapperMessage(this@MyWebSocket,
                     ServerResponse(success = false, message = mess))
             }
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            webSocket.close(1000, null)
             activity.runOnUiThread {
-                Log.d("MyWebSocket", "Соединение закрывается: $reason" )
             }
+            webSocket.close(1000, null)
+            Log.d("MyWebSocket", "Соединение закрывается: $reason" )
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            activity.runOnUiThread {
-                Log.d("MyWebSocket", "Ошибка подключения: ${t.message}" )
-            }
+//            activity.runOnUiThread {
+//            }
+            Log.d("MyWebSocket", "Ошибка подключения: ${t.message}" )
         }
 
     })

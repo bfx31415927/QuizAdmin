@@ -106,7 +106,7 @@ inline fun <reified T : WebSocketMessage> sendWrapperMessage(myWebSocket: MyWebS
             version = "1.0",
             data = data
         )
-        Log.d("MyWebSocket", "sendWrapperMessage готовит к отправке сообщение: $wrapper")
+//        Log.d("MyWebSocket", "sendWrapperMessage готовит к отправке сообщение: $wrapper")
         val jsonString = json.encodeToString(wrapper)
 
         myWebSocket.webSocket.send(jsonString)
