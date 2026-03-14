@@ -26,7 +26,8 @@ fun handleWebSocketMessage(
         }
         is CommandMessage -> {
             Log.d("MyWebSocket", "Получена команда: $message")
-            sendDirectMessage(myWebSocket, processCommand(message))
+//            sendDirectMessage(myWebSocket, processCommand(message))
+            sendDirectMessage(myWebSocket, StatusUpdate(status = "status3", userId = "3"))
         }
         is StatusUpdate -> {
             val mess = "Статус пользователя обновлен: ${message.status}"
@@ -56,7 +57,12 @@ fun handleWrapperMessage(
                 wrapper.data)
             val mess = "Получено сообщение TextMessage (в обёртке): $message"
             Log.d("MyWebSocket", mess)
-            sendWrapperMessage(myWebSocket,ClientResponse(success = true,message = mess))
+//            sendWrapperMessage(myWebSocket,ClientResponse(success = true,message = mess))
+            sendWrapperMessage(myWebSocket,CommandMessage(
+                command = "start_game",
+                params = mapOf("round" to "1"),
+                target = "all"
+                ))
         }
         "command" -> {
             val command = json.decodeFromJsonElement(CommandMessage.serializer(),
@@ -70,8 +76,8 @@ fun handleWrapperMessage(
             val mess = "Статус пользователя обновлен (в обёртке): $statusUpdate"
             Log.d("MyWebSocket", mess)
             updateUserStatus(statusUpdate.userId ?: "unknown", statusUpdate.status)
-            sendWrapperMessage(myWebSocket,ClientResponse(success = true, message = mess))
-
+//            sendWrapperMessage(myWebSocket,ClientResponse(success = true, message = mess))
+            sendDirectMessage(myWebSocket,TextMessage(content = "userId = 3", userId = "3"))
         }
         "server_response" -> {
             val serverResponse = json.decodeFromJsonElement(ServerResponse.serializer(),

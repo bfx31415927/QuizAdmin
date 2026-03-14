@@ -48,12 +48,12 @@ class MyWebSocket(private val activity: AppCompatActivity) {
 //            activity.runOnUiThread {
 //            }
             Log.d("MyWebSocket", "Соединение установлено")
-//            sendWrapperMessage(this@MyWebSocket,
-//                TextMessage(
-//                    content = "Привет от Android-клиента!",
-//                    userId = "1"
-//                )
-//            )
+            sendWrapperMessage(this@MyWebSocket,
+                TextMessage(
+                    content = "Привет от Android-клиента!",
+                    userId = "1"
+                )
+            )
 //            sendWrapperMessage(this@MyWebSocket,
 //                CommandMessage(
 //                    command = "start_game",

@@ -76,3 +76,24 @@
    судить о стыковке двух версий программ.
 16) Сделал ветку этой версии клиента - QuizAdmin_MessagesTest,
     Сделал ветку этой версии сервера - QuizServer_MessagesTest
+
+14.03.2026 (19:38) (****) [BRANCH: QuizAdmin_MessagesTest]
+-------------------------
+Подправил код так, чтобы после запуска сервера и потом клиента 
+последовательность действий была такая:
+CLIENT(отправил):  	sendWrapperMessage(this@MyWebSocket,TextMessage(content = "Привет от Android-клиента!",userId = "1"))
+SERVER(получил):  	TextMessage(content = "Привет от Android-клиента!",userId = "1")
+SERVER(отправил):  	sendWrapperMessage(session,TextMessage(content = "userId = 2", userId = "2"))
+CLIENT(получил):  	TextMessage(content = "userId = 2", userId = "2")
+CLIENT(отправил):  	sendWrapperMessage(myWebSocket,CommandMessage(command = "start_game",params = mapOf("round" to "1"),target = "all"))
+SERVER(получил):		CommandMessage(command = "start_game",params = mapOf("round" to "1"),target = "all")
+SERVER(отправил):		sendWrapperMessage(session, StatusUpdate( status = "status", userId = "2"))
+CLIENT(получил):		StatusUpdate( status = "status", userId = "2")
+CLIENT(отправил):   sendDirectMessage(myWebSocket,TextMessage(content = "userId = 3", userId = "3"))
+SERVER(получил):		TextMessage(content = "userId = 3", userId = "3")
+SERVER(отправил):		sendDirectMessage(session,CommandMessage(command = "stop_game",params = mapOf("round" to "2"),target = "not_all"))
+CLIENT(получил):		CommandMessage(command = "stop_game",params = mapOf("round" to "2"),target = "not_all")
+CLIENT(отправил):		sendDirectMessage(myWebSocket, StatusUpdate(status = "status3", userId = "3"))
+SERVER(получил):		StatusUpdate(status = "status3", userId = "3")
+SERVER(отправил):		sendDirectMessage(session,ServerResponse(success = true, message = mess))
+CLIENT(получил):		Log.d("MyWebSocket", "Получено сообщение ServerResponse: $message")
