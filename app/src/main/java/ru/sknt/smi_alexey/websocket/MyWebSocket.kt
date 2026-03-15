@@ -16,6 +16,7 @@ import ru.sknt.smi_alexey.handle_server_message.handleWebSocketMessage
 import ru.sknt.smi_alexey.handle_server_message.handleWrapperMessage
 import ru.sknt.smi_alexey.handle_server_message.sendDirectMessage
 import ru.sknt.smi_alexey.handle_server_message.sendWrapperMessage
+import ru.smi_alexey.quizserver.app.getOrGenerateDeviceId
 import ru.smi_alexey.quizserver.app.serverHost
 import ru.smi_alexey.quizserver.app.serverPort
 import ru.smi_alexey.quizserver.app.vs_suffix
@@ -36,12 +37,16 @@ fun send(text: String){
 
 var myWebSocket: MyWebSocket? = null
 class MyWebSocket(private val activity: AppCompatActivity) {
+
+    val deviceID = getOrGenerateDeviceId(activity.applicationContext)
+
     val client = OkHttpClient.Builder()
         .pingInterval(15, TimeUnit.SECONDS) // Ping каждые 15 с
         .build()
 
     val request = Request.Builder()
         .url("ws://" + serverHost + ':' + serverPort.toString() + '/' + vs_suffix)
+        .header("X-Device-ID", deviceID)
         .build()
     val webSocket = client.newWebSocket(request, object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -127,8 +132,8 @@ class MyWebSocket(private val activity: AppCompatActivity) {
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            activity.runOnUiThread {
-            }
+//            activity.runOnUiThread {
+//            }
             webSocket.close(1000, null)
             Log.d("MyWebSocket", "Соединение закрывается: $reason" )
         }

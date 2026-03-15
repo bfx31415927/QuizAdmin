@@ -97,3 +97,7 @@ CLIENT(отправил):		sendDirectMessage(myWebSocket, StatusUpdate(status = 
 SERVER(получил):		StatusUpdate(status = "status3", userId = "3")
 SERVER(отправил):		sendDirectMessage(session,ServerResponse(success = true, message = mess))
 CLIENT(получил):		Log.d("MyWebSocket", "Получено сообщение ServerResponse: $message")
+
+15.03.2026 (13:04) (****) [BRANCH: QuizAdmin_MessagesTest]
+-------------------------	
+1) Добавил функцию  getOrGenerateDeviceId() и ее использование
